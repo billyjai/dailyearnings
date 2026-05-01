@@ -181,7 +181,9 @@ function closeEntry() {
 
 function adjustQty(i, delta) {
   state.editQty[i] = Math.max(0, state.editQty[i] + delta);
-  showEntrySheet();
+  document.getElementById(`qty-${i}`).textContent = state.editQty[i];
+  document.getElementById(`minus-${i}`).disabled = state.editQty[i] === 0;
+  document.querySelector('.total-amount').textContent = fmtCurrency(entryDayTotal());
 }
 
 function saveEntry() {
@@ -210,9 +212,9 @@ function showEntrySheet() {
           ? `<div class="item-price">@ ${fmtCurrency(state.itemPrices[i])} each</div>` : ''}
       </div>
       <div class="stepper">
-        <button class="step-btn minus" onclick="adjustQty(${i},-1)"
+        <button class="step-btn minus" id="minus-${i}" onclick="adjustQty(${i},-1)"
           ${state.editQty[i] === 0 ? 'disabled' : ''}>−</button>
-        <span class="step-val">${state.editQty[i]}</span>
+        <span class="step-val" id="qty-${i}">${state.editQty[i]}</span>
         <button class="step-btn plus" onclick="adjustQty(${i},1)">+</button>
       </div>
     </div>`).join('');
