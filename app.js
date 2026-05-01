@@ -8,7 +8,8 @@ const firebaseConfig = {
   appId:             "1:614792192006:web:2db4602661343a76216387"
 };
 firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+const db   = firebase.firestore();
+const auth = firebase.auth();
 db.enablePersistence().catch(() => {}); // offline support
 
 const configDoc   = db.collection('data').doc('config');
@@ -340,6 +341,7 @@ function renderPrices() {
         <span class="info-text">Prices are used to automatically calculate your daily and monthly revenue.</span>
       </div>
       <button class="save-btn" id="save-prices-btn" onclick="savePrices()">Save Prices</button>
+      <button class="logout-btn" onclick="logout()">Sign Out</button>
     </div>`;
 }
 
@@ -354,10 +356,33 @@ function savePrices() {
   }, 2000);
 }
 
-// ── Boot
-loadData();
-switchTab(0);
+// ── Auth
+function login() {
+  const email    = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const errEl    = document.getElementById('login-error');
+  errEl.textContent = '';
+  auth.signInWithEmailAndPassword(email, password)
+    .catch(() => { errEl.textContent = 'Invalid email or password.'; });
+}
 
+function logout() {
+  auth.signOut();
+}
+
+// ── Boot
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(() => {});
 }
+
+auth.onAuthStateChanged(user => {
+  if (user) {
+    document.getElementById('login-screen').setAttribute('hidden', '');
+    document.getElementById('app').removeAttribute('hidden');
+    loadData();
+    switchTab(0);
+  } else {
+    document.getElementById('login-screen').removeAttribute('hidden');
+    document.getElementById('app').setAttribute('hidden', '');
+  }
+});

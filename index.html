@@ -16,7 +16,20 @@
   <link rel="stylesheet" href="app.css">
 </head>
 <body>
-  <div id="app">
+  <!-- Login Screen -->
+  <div id="login-screen">
+    <div class="login-card">
+      <div class="login-title">DailyEarnings</div>
+      <div class="login-sub">Sign in to continue</div>
+      <input id="login-email" type="email" placeholder="Email" class="login-input" autocomplete="email">
+      <input id="login-password" type="password" placeholder="Password" class="login-input"
+        autocomplete="current-password" onkeydown="if(event.key==='Enter')login()">
+      <div id="login-error" class="login-error"></div>
+      <button class="save-btn" onclick="login()">Sign In</button>
+    </div>
+  </div>
+
+  <div id="app" hidden>
     <div id="view-calendar" class="view"></div>
     <div id="view-report"   class="view"></div>
     <div id="view-prices"   class="view"></div>
@@ -52,6 +65,7 @@
 
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
