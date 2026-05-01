@@ -1,4 +1,4 @@
-const CACHE = 'dailyearnings-v1';
+const CACHE = 'dailyearnings-v2';
 const ASSETS = ['./','./index.html','./app.css','./app.js','./manifest.json',
                 './icon-192.png','./icon-512.png','./icon-apple.png'];
 
