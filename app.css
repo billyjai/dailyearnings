@@ -45,7 +45,7 @@ body {
 .header {
   background: var(--header-bg);
   text-align: center;
-  padding: 56px 16px 16px;
+  padding: 20px 16px 14px;
   flex-shrink: 0;
 }
 .header-title {
@@ -73,8 +73,8 @@ body {
   background: var(--card);
   border-radius: 14px;
   border: 0.8px solid var(--border);
-  padding: 16px;
-  margin-bottom: 12px;
+  padding: 12px;
+  margin-bottom: 8px;
 }
 
 .section-label {
@@ -82,7 +82,7 @@ body {
   font-weight: 600;
   color: var(--sub);
   letter-spacing: 0.04em;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 
 /* ── Month nav ───────────────────────────────────── */
@@ -251,13 +251,13 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 0;
+  padding: 7px 0;
 }
 .item-row.bordered { border-bottom: 0.5px solid var(--border); }
 
 .item-info { flex: 1; }
-.item-name { font-size: 16px; color: var(--title); }
-.item-price { font-size: 11px; color: var(--sub); margin-top: 2px; }
+.item-name { font-size: 15px; color: var(--title); }
+.item-price { font-size: 11px; color: var(--sub); margin-top: 1px; }
 
 /* ── Stepper ─────────────────────────────────────── */
 .stepper {
@@ -311,7 +311,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 0;
+  padding: 4px 0;
 }
 .date-row-label { font-size: 15px; color: var(--title); }
 .date-input {

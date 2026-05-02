@@ -24,11 +24,11 @@ const KEY_ENTRIES = 'de_entries';
 const state = {
   tab: 0,
   month: new Date(),
-  itemNames:  ['SP', 'X-Ray', 'Mouth Wash', 'ID Brush'],
-  itemPrices: [170, 300, 0, 0],
+  itemNames:  ['SP', 'X-Ray', 'Mouth Wash', 'ID Brush', 'NG', 'Toothpaste'],
+  itemPrices: [170, 300, 0, 0, 0, 0],
   entries: {},
   editDate: null,
-  editQty:  [0,0,0,0],
+  editQty:  [0,0,0,0,0,0],
   reportStart: firstOfMonth(new Date()),
   reportEnd:   new Date(),
 };
@@ -39,21 +39,51 @@ function loadData() {
     const n = localStorage.getItem(KEY_NAMES);
     const p = localStorage.getItem(KEY_PRICES);
     const e = localStorage.getItem(KEY_ENTRIES);
-    if (n) state.itemNames  = JSON.parse(n);
-    if (p) state.itemPrices = JSON.parse(p);
-    if (e) state.entries    = JSON.parse(e);
+    if (n) {
+      const names = JSON.parse(n);
+      while (names.length < state.itemNames.length) names.push(state.itemNames[names.length]);
+      state.itemNames = names;
+    }
+    if (p) {
+      const prices = JSON.parse(p);
+      while (prices.length < state.itemPrices.length) prices.push(state.itemPrices[prices.length]);
+      state.itemPrices = prices;
+    }
+    if (e) {
+      const entries = JSON.parse(e);
+      const n6 = state.itemNames.length;
+      Object.keys(entries).forEach(k => {
+        const qty = entries[k].quantities || [];
+        while (qty.length < n6) qty.push(0);
+        entries[k] = { quantities: qty };
+      });
+      state.entries = entries;
+    }
   } catch(_) {}
 
   // Fetch fresh data from Firestore in background
   Promise.all([configDoc.get(), entriesColl.get()]).then(([cfg, snap]) => {
     if (cfg.exists) {
       const d = cfg.data();
-      if (d.itemNames)  state.itemNames  = d.itemNames;
-      if (d.itemPrices) state.itemPrices = d.itemPrices;
+      if (d.itemNames) {
+        const names = [...d.itemNames];
+        while (names.length < state.itemNames.length) names.push(state.itemNames[names.length]);
+        state.itemNames = names;
+      }
+      if (d.itemPrices) {
+        const prices = [...d.itemPrices];
+        while (prices.length < state.itemPrices.length) prices.push(state.itemPrices[prices.length]);
+        state.itemPrices = prices;
+      }
     }
+    const n6 = state.itemNames.length;
     if (!snap.empty) {
       state.entries = {};
-      snap.forEach(doc => { state.entries[doc.id] = doc.data(); });
+      snap.forEach(doc => {
+        const qty = [...(doc.data().quantities || [])];
+        while (qty.length < n6) qty.push(0);
+        state.entries[doc.id] = { quantities: qty };
+      });
     }
     // Update local cache
     localStorage.setItem(KEY_NAMES,   JSON.stringify(state.itemNames));
@@ -168,8 +198,9 @@ function changeMonth(offset) {
 function openEntry(key) {
   state.editDate = key;
   const existing = state.entries[key];
-  const qty = existing ? [...existing.quantities] : [0,0,0,0];
-  state.editQty = [...qty, 0, 0, 0, 0].slice(0, 4);
+  const n6 = state.itemNames.length;
+  const qty = existing ? [...existing.quantities] : Array(n6).fill(0);
+  state.editQty = [...qty, ...Array(n6).fill(0)].slice(0, n6);
   showEntrySheet();
   document.getElementById('modal').removeAttribute('hidden');
 }
@@ -205,7 +236,7 @@ function showEntrySheet() {
     { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
   const rows = state.itemNames.map((name, i) => `
-    <div class="item-row${i < 3 ? ' bordered' : ''}">
+    <div class="item-row${i < state.itemNames.length - 1 ? ' bordered' : ''}">
       <div class="item-info">
         <div class="item-name">${name}</div>
         ${state.itemPrices[i] > 0
@@ -245,8 +276,9 @@ function renderReport() {
   const startKey = dateKey(state.reportStart);
   const endKey   = dateKey(state.reportEnd);
 
-  const unitTotals = [0,0,0,0];
-  const itemTotals = [0,0,0,0];
+  const n6 = state.itemNames.length;
+  const unitTotals = Array(n6).fill(0);
+  const itemTotals = Array(n6).fill(0);
   let grand = 0;
 
   let d = new Date(state.reportStart);
@@ -269,7 +301,7 @@ function renderReport() {
   }
 
   const rows = state.itemNames.map((name, i) => `
-    <div class="item-row${i < 3 ? ' bordered' : ''}">
+    <div class="item-row${i < state.itemNames.length - 1 ? ' bordered' : ''}">
       <div class="item-info">
         <div class="item-name">${name}</div>
         <div class="item-price">${unitTotals[i]} units</div>
@@ -316,7 +348,7 @@ function renderReport() {
 // ── Prices view
 function renderPrices() {
   const rows = state.itemNames.map((name, i) => `
-    <div class="price-row${i < 3 ? ' bordered' : ''}">
+    <div class="price-row${i < state.itemNames.length - 1 ? ' bordered' : ''}">
       <input class="name-input" type="text" value="${name}" placeholder="Item ${i+1} name"
         oninput="state.itemNames[${i}]=this.value">
       <div class="price-input-wrap">
@@ -331,7 +363,7 @@ function renderPrices() {
   document.getElementById('view-prices').innerHTML = `
     <div class="header">
       <div class="header-title">Item Prices</div>
-      <div class="header-sub">Set names & prices for your 4 items</div>
+      <div class="header-sub">Set names & prices for your items</div>
     </div>
     <div class="scroll-area">
       <div class="card">
